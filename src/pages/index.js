@@ -1,56 +1,92 @@
 import { useState } from 'react';
 
 export default function Home() {
-  const [username, setUsername] = useState('');
+  const [Leetcodeusername, setLeetcodeUsername] = useState('');
+  const [Codechefusername, setCodechefUsername] = useState('');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setData(null);
+  e.preventDefault();
+  setError('');
+  setData(null);
 
-    try {
-      const res = await fetch(`/api/scrape?username=${username}`);
-      const json = await res.json();
+  try {
+    const [leetRes, chefRes] = await Promise.all([
+      fetch(`/api/leetcode?username=${Leetcodeusername}`),
+      fetch(`/api/codechef?username=${Codechefusername}`)
+    ]);
 
-      if (res.ok) {
-        setData(json);
-      } else {
-        setError(json.error);
-      }
-    } catch (err) {
-      setError('Something went wrong');
+    const [leetData, chefData] = await Promise.all([
+      leetRes.json(),
+      chefRes.json()
+    ]);
+
+    if (!leetRes.ok) {
+      setError(leetData.error || 'Error fetching LeetCode data');
+      return;
     }
-  };
+
+    if (!chefRes.ok) {
+      setError(chefData.error || 'Error fetching CodeChef data');
+      return;
+    }
+
+    setData({
+      leetcode: leetData,
+      codechef: chefData
+    });
+  } catch (err) {
+    console.error(err);
+    setError('Something went wrong');
+  }
+};
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Code Profile Scraper</h1>
+      <h1>LeetCode Profile Scraper</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
         <input
           type="text"
-          placeholder="Enter GitHub username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter LeetCode username"
+          value={Leetcodeusername}
+          onChange={(e) => setLeetcodeUsername(e.target.value)}
           style={{ marginRight: '1rem', padding: '0.5rem' }}
-        />
-        <button type="submit" style={{ padding: '0.5rem' }}>Scrape</button>
-      </form>
+        /><br></br>
+        <input
+          type="text"
+          placeholder="Enter CodeChef username"   
+          value={Codechefusername}
+          onChange={(e) => setCodechefUsername(e.target.value)}
+          style={{ marginRight: '1rem', padding: '0.5rem' }}
+        /><br></br>
+        <button type="submit" style={{ padding: '0.5rem' }}>Get Details</button>
+      </form> 
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {data && (
         <div style={{ marginTop: '2rem' }}>
-          <h2>{data.name}</h2>
-          <p>{data.bio}</p>
-          <ul>
-            <li>Repositories: {data.repos}</li>
-            <li>Followers: {data.followers}</li>
-            <li>Following: {data.following}</li>
-          </ul>
+            <div>
+              <h2>LeetCode</h2>
+              <h2>{Leetcodeusername}</h2>
+              <ul>
+                <li>Total Solved: {data.leetcode.totalSolved}</li>
+                <li>Easy Solved: {data.leetcode.easySolved}</li>
+                <li>Medium Solved: {data.leetcode.mediumSolved}</li>
+                <li>Hard Solved: {data.leetcode.hardSolved}</li>
+              </ul> 
+            </div>
+            <div>
+              <h2>Codechef</h2>
+              <h2>{Codechefusername}</h2>
+              <ul>
+              <li>Contest Rating: {data.codechef.rating}</li>
+              </ul>
+            </div>
         </div>
+
       )}
     </div>
   );
