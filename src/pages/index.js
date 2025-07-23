@@ -11,6 +11,11 @@ export default function Home() {
   setError('');
   setData(null);
 
+  if (!Leetcodeusername || !Codechefusername) {
+    setError('Please enter all usernames.');
+    return;
+  }
+
   try {
     const [leetRes, chefRes] = await Promise.all([
       fetch(`/api/leetcode?username=${Leetcodeusername}`),
@@ -21,7 +26,7 @@ export default function Home() {
       leetRes.json(),
       chefRes.json()
     ]);
-
+    console.log(leetData, chefData);
     if (!leetRes.ok) {
       setError(leetData.error || 'Error fetching LeetCode data');
       return;
@@ -43,50 +48,57 @@ export default function Home() {
 };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>LeetCode Profile Scraper</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold mb-6 text-blue-700">Coding Profile Intel</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Enter LeetCode username"
-          value={Leetcodeusername}
-          onChange={(e) => setLeetcodeUsername(e.target.value)}
-          style={{ marginRight: '1rem', padding: '0.5rem' }}
-        /><br></br>
-        <input
-          type="text"
-          placeholder="Enter CodeChef username"   
-          value={Codechefusername}
-          onChange={(e) => setCodechefUsername(e.target.value)}
-          style={{ marginRight: '1rem', padding: '0.5rem' }}
-        /><br></br>
-        <button type="submit" style={{ padding: '0.5rem' }}>Get Details</button>
-      </form> 
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+        <div className="mb-4">
+          <label htmlFor="leetcode-username" className="block text-gray-700 font-semibold mb-2">LeetCode Username</label>
+          <input
+            id="leetcode-username"
+            type="text"
+            placeholder="Enter LeetCode username"
+            value={Leetcodeusername}
+            onChange={(e) => setLeetcodeUsername(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="codechef-username" className="block text-gray-700 font-semibold mb-2">CodeChef Username</label>
+          <input
+            id="codechef-username"
+            type="text"
+            placeholder="Enter CodeChef username"   
+            value={Codechefusername}
+            onChange={(e) => setCodechefUsername(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
+          />
+        </div>
+        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Get Details</button>
+      </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="text-red-600 font-semibold mb-4">{error}</p>}
 
       {data && (
-        <div style={{ marginTop: '2rem' }}>
-            <div>
-              <h2>LeetCode</h2>
-              <h2>{Leetcodeusername}</h2>
-              <ul>
-                <li>Total Solved: {data.leetcode.totalSolved}</li>
-                <li>Easy Solved: {data.leetcode.easySolved}</li>
-                <li>Medium Solved: {data.leetcode.mediumSolved}</li>
-                <li>Hard Solved: {data.leetcode.hardSolved}</li>
-              </ul> 
-            </div>
-            <div>
-              <h2>Codechef</h2>
-              <h2>{Codechefusername}</h2>
-              <ul>
-              <li>Contest Rating: {data.codechef.rating}</li>
-              </ul>
-            </div>
+        <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg p-6 mt-6 text-gray-900">
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">LeetCode</h2>
+            <h3 className="text-lg text-gray-600 mb-2">{Leetcodeusername}</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Total Solved: <span className="font-medium">{data.leetcode.totalSolved}</span></li>
+              <li>Easy Solved: <span className="font-medium">{data.leetcode.easySolved}</span></li>
+              <li>Medium Solved: <span className="font-medium">{data.leetcode.mediumSolved}</span></li>
+              <li>Hard Solved: <span className="font-medium">{data.leetcode.hardSolved}</span></li>
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">CodeChef</h2>
+            <h3 className="text-lg text-gray-600 mb-2">{Codechefusername}</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Contest Rating: <span className="font-medium">{data.codechef.rating}</span></li>
+            </ul>
+          </div>
         </div>
-
       )}
     </div>
   );

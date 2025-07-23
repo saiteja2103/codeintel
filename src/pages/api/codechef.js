@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { use } from 'react';
+
 
 export default async function handler(req, res) {
   const { username } = req.query;
